@@ -1,0 +1,183 @@
+Create the following topology with OSPF routing and 
+
+▪ Configure NTP. 
+
+▪ Configure Routers to log messages to the syslog server. 
+
+▪ Configure R3 to support SSH connections 
+
+Router1 
+
+Router> en  
+
+Router#conft  
+
+Router(config)#host R1 
+
+R1(config)#interface GigabitEthernet0/0  
+
+R1(config-if) #ip address 192.168.1.1 255.255.255.0  
+
+R1(config-if) #no shut 
+
+R1(config)#interface Serial0/0/0  
+
+Rl(config-if) #ip address 10.1.1.1 255.255.255.252  
+
+R1(config-if)#no shut  
+
+R1(config-if) #^z  
+
+R1#exit 
+
+Router 2 
+
+Router> en  
+
+Router#conft  
+
+Router(config) #host R2  
+
+R2(config)#interface Serial0/0/0 
+
+R2(config-il) #ip address 10.1.1.2 255.255.255.252  
+
+R2(config-i) #no shut  
+
+R2(config) #interface Serial0/0/1  
+
+R2(config-il) #ip address 10.2.2.2 255.255.255.252 
+
+Router 3 
+
+Router> en  
+
+Router#conft  
+
+Router(config)#host R3  
+
+R3 (config) #interface Serial0/0/0  
+
+R3 (config-if) #ip address 10.2.2.1 255.255.255.252  
+
+R3 (config-it) #no shut  
+
+R3 (config) #interface CigabitEthernet0/0  
+
+R3 (config-if)#ip address 192.168.3.1 255.255.255.0 R3(config-i #^z  
+
+R3#exit 
+
+OSPF 
+
+Router 1  
+
+R1>en R1#conft  
+
+RI(config)#router ospf 1  
+
+R1(config-router)#network 192.168.1.0 0.0.0.255 area 0  
+
+Rl(config-router)#network 10.1.1.0 0.0.0.3 area 0  
+
+Rl(config-router) # ^Z  
+
+R1#exit 
+
+Router 2  
+
+R2 en R2#conft  
+
+R2(config) #router ospf 1  
+
+R2(config-router) #network 10.1.1.0 0.0.0.3 area 0  
+
+R2(config-router) #network 10.2.2.0 0.0.0.3 area 0  
+
+R2(config-router)# ^Z  
+
+R2#exit 
+
+Router 3 
+
+R3en R3#conft  
+
+R3(config) #router ospf 1 
+
+ R3(config-router)#network 192.168.3.0 0.0.0.255 area 0  
+
+R3(config-router)#network 10.2.2.0 0.0.0.3 area 0  
+
+R3(config-router) # ^Z 
+
+ R3#exit 
+
+▪ Configure NTP. And syslog 
+
+Gui 
+
+Server>NTP 
+
+Service Authentication enabled 
+
+Key = 1 Password = NTPpwd 
+
+ 
+
+Router 1 same for all the router 
+
+R1>en  
+
+R1#conft  
+
+R1(config)#ntp server 192.168.1.5  
+
+R1(config)#ntp update-calendar  
+
+Rl(config)#ntp authenticate  
+
+RI(config) #ntp trusted-key 1  
+
+Rl(config) #ntp authentication-key 1 md5 NTPpwd  
+
+Rl(config) #service timestamps log datetimemsec 
+
+Rl(config) #logging host 192.168.1.6 
+
+RI(config) # ^Z  
+
+R1#exit 
+
+▪ Configure R3 to support SSH connections 
+
+R3>en  
+
+R3#conft 
+
+R3(config)#ip domain-name securityincomputing.com  
+
+R3(config) #username SSHadmin privilege 15 secret pwd 
+
+R3(config) #line vty 0 4  
+
+R3(config-line) #login local  
+
+R3(config-line) #transport input ssh  
+
+R3(config-line) #crypto key zeroize rsa  
+
+% No Signature RSA Keys found in configuration. 
+
+R3(config) #crypto key generate rsa 
+
+R3(config) #ipssh time-out 90  
+
+"Mar 1 1:51:24.621: %SSH-5-ENABLED: SSH 1.99 has been enabled  
+
+R3(config)#ipssh authentication-retries 2 
+
+ R3(config)#ipssh version 2  
+
+R3(config)#^Z 
+
+R3#exit 

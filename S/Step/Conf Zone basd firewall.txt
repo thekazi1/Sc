@@ -1,0 +1,245 @@
+Create the following topology using static routing and configure 
+
+▪ A zone-based policy (ZPF) firewall on R3 
+
+▪ Verify ZPF firewall functionality using ping, SSH and a web browser. 
+
+ 
+
+Router 1 config for rip 
+
+  
+
+(copy paste below command in router CLI)  
+
+  
+
+en 
+
+conf t 
+
+router rip 
+
+network 192.168.1.0 
+
+network 10.1.1.0 
+
+  
+
+router 2 for rip 
+
+  
+
+en 
+
+conf t 
+
+router rip 
+
+network 10.1.1.0 
+
+network 10.2.2.0 
+
+  
+
+  
+
+router 3 for rip 
+
+  
+
+en 
+
+conf t 
+
+router rip 
+
+network 10.2.2.0 
+
+network 192.168.3.0 
+
+  
+
+  
+
+Configure SSH On Router 2 
+
+  
+
+en 
+
+conf t 
+
+ip domain-name  shaikh.com 
+
+username admin secret pwd 
+
+line vty 0 4 
+
+login local 
+
+transport input ssh 
+
+hostname R2 
+
+crypto key generate rsa  
+
+How many bits in the modulus [512]: 1024 
+
+% Generating 1024 bit RSA keys, keys will be non-exportable...[OK] 
+
+  
+
+ip ssh time-out 90 
+
+ip ssh authentication-retries 2 
+
+ip ssh version 2 
+
+  
+
+checking ssh enable on pc c 
+
+  
+
+ssh -l admin 10.2.2.2 
+
+password:pwd 
+
+  
+
+login success ful 
+
+  
+
+  
+
+CREATE THE FIREWALL ZONES ON R3  
+
+Enable the Security Technology package on R3 
+
+R3> 
+
+R3>en 
+
+R3#show version 
+
+  
+
+Technology Package License Informa on for Module:'c1900' 
+
+---------------------------------------------------------------- 
+
+Technology Technology-package Technology-package 
+
+Current Type Next reboot 
+
+----------------------------------------------------------------- 
+
+ipbase ipbasek9 Permanent ipbasek9 security None 
+
+None None data None None None 
+
+  
+
+Configura on register is 0x2102 
+
+R2# 
+
+  
+
+R3>en 
+
+R3#conf t 
+
+Enter configuration commands, one per line. End with CNTL/Z. 
+
+R3(config)#license boot module c1900 technology-package securityk9 
+
+  
+
+ACCEPT? [yes/no]: yes 
+
+% use 'write' command to make license boot config take effect on next boot 
+
+R3(config)#: %IOS_LICENSE_IMAGE_APPLICATION-6-LICENSE_LEVEL: Module 
+
+name = C1900 Next reboot level = securityk9 and License = securityk9 
+
+R3(config)#ex 
+
+R3# 
+
+%SYS-5-CONFIG_I: Configured from console by console 
+
+R3#reload 
+
+System configuration has been modified. Save? [yes/no]:yes Building configuration... 
+
+[OK] 
+
+Proceed with reload? [confirm] 
+
+------------------------------------------- 
+
+  
+
+  
+
+  
+
+Create a Firewall zones,class Map and ACL on Router 3 
+
+  
+
+enable 
+
+configure terminal 
+
+zone security IN-ZONE 
+
+exit 
+
+zone security OUT-ZONE 
+
+exit 
+
+access-list 101 permit ip 192.168.3.0 0.0.0.255 any 
+
+class-map type inspect match-all IN-NET-CLASS-MAP 
+
+match access-group 101 
+
+exit 
+
+policy-map type inspect IN-2-OUT-PMAP 
+
+class type inspect IN-NET-CLASS-MAP 
+
+inspect 
+
+exit 
+
+exit 
+
+zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE 
+
+service-policy type inspect IN-2-OUT-PMAP 
+
+exit 
+
+interface GigabitEthernet0/0 
+
+zone-member security IN-ZONE 
+
+ex 
+
+interface serial0/0/0 
+
+zone-member security OUT-ZONE 
+
+exit 
+
+exit 
+
+ 
